@@ -55,7 +55,7 @@ class Monad {
 };
 
 template <typename T>
-concept Monadable = is_specialization<std::remove_cvref_t<T>, Monad>::value;
+concept Monadable = IsSpecialization<std::remove_cvref_t<T>, Monad>::value;
 
 template <Monadable T, typename Func,
 		  typename ValueType = std::remove_cvref_t<T>::ValueType,

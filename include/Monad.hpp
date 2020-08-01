@@ -52,6 +52,16 @@ class Monad {
 	}
 
 	bool HasValue() const noexcept { return static_cast<bool>(this->hasValue); }
+
+	template <typename Func,
+			  typename Ret = std::remove_cvref_t<std::result_of_t<Func(T)>>>
+	requires std::is_invocable_v<Func, ValueType> Monad<Ret>
+		Apply(Func &&func) {
+		Monad<Ret> ret{};
+		if (this->hasValue)
+			ret = func(this->value);
+		return ret;
+	}
 };
 
 template <typename T>

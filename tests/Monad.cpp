@@ -3,14 +3,19 @@
 #include <fmt/core.h>
 #include <type_traits>
 using namespace Functor;
-TEST_CASE("Monad testing", "[monad]") {
+
+TEST_CASE("Monad construction", "[monad]") {
 	Monad<int> foo;
 	Monad bar{10};
 	auto baz = Monad{Monad{Monad{10}}};
 	REQUIRE(std::is_same_v<decltype(baz), Monad<int>>);
+}
+TEST_CASE("Monad apply", "[monad]") {
+	auto foo = Monad{10};
 	auto dbl = [](int m) { return m * 2; };
-	auto applied = ApplyFunc(bar, dbl);
-	fmt::print("Is foo full : {}", foo.HasValue());
-	auto appliedFoo = ApplyFunc(foo, dbl);
-	REQUIRE(applied.Value() == (bar.Value() * 2));
+	auto applied = ApplyFunc(foo, dbl);
+	REQUIRE(applied.Value() == (foo.Value() * 2));
+	REQUIRE(foo.Apply(dbl).Value() == foo.Value() * 2);
+	auto bar = Monad<int>{};
+	REQUIRE(bar.Apply(dbl).HasValue() == false);
 }

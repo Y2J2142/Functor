@@ -2,7 +2,7 @@
 #include "catch2/catch.hpp"
 #include <fmt/core.h>
 #include <type_traits>
-using namespace Functor;
+using namespace Functional;
 
 TEST_CASE("Monad construction", "[monad]") {
 	Monad<int> foo;

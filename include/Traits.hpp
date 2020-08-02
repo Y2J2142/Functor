@@ -1,6 +1,6 @@
 #pragma once
 #include <type_traits>
-namespace Functor {
+namespace Functional {
 
 template <typename Test, template <typename...> typename Ref>
 struct IsSpecialization : std::false_type {};

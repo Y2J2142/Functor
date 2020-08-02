@@ -4,7 +4,7 @@
 #include <exception>
 #include <type_traits>
 #include <utility>
-namespace Functor {
+namespace Functional {
 
 struct EmptyMonadException : public std::exception {
 	const char *what() const noexcept override { return "Monad is empty"; }
@@ -83,4 +83,4 @@ Monad(T t) -> Monad<std::remove_cvref_t<T>>;
 
 template <typename T>
 Monad(Monad<T> t) -> Monad<std::remove_cvref_t<T>>;
-} // namespace Functor
+} // namespace Functional

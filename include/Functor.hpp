@@ -12,7 +12,7 @@ concept Collection = requires(T t) {
 	t.begin();
 	t.end();
 	t.size();
-	// std::remove_cvref_t<T>::value_type;
+	// typename T::value_type; // std::remove_cvref_t<T>::value_type;
 };
 
 template <Collection T>
@@ -21,6 +21,7 @@ class Functor {
 	T collection;
 
   public:
+	Functor() = default;
 	decltype(auto) begin() const noexcept { return collection.begin(); }
 	decltype(auto) begin() noexcept { return collection.begin(); }
 	decltype(auto) end() const noexcept { return collection.end(); }
@@ -34,15 +35,15 @@ class Functor {
 			  typename Ret =
 				  std::remove_cvref_t<std::invoke_result_t<Func, ValueType>>,
 			  typename ReturnFunctor = SwapTemplateParameter<Ret, T>::Type>
-	Functor<ReturnFunctor> Map(Func &&f) {
+	Functor<ReturnFunctor> Map(Func &&f) const {
 		ReturnFunctor outFunctor{};
-		if constexpr (requires { outFunctor.reserve(1); })
-			outFunctor.reserve(collection.size());
+		if constexpr (requires { this->collection.reserve(1); })
+			outFunctor.reserve(outFunctor.size());
 
 		std::transform(collection.begin(), collection.end(),
 					   std::back_inserter(outFunctor), std::forward<Func>(f));
 
-		return Functor{std::move(outFunctor)};
+		return Functor<ReturnFunctor>{std::move(outFunctor)};
 	}
 };
 

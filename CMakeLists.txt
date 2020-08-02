@@ -6,7 +6,7 @@ find_package(fmt REQUIRED)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 include_directories(include/)
-add_executable(mainTest tests/main.cpp tests/Identity.cpp tests/Monad.cpp tests/Traits.cpp)
+add_executable(mainTest tests/main.cpp tests/Identity.cpp tests/Monad.cpp tests/Traits.cpp tests/Functor.cpp)
 target_link_libraries(mainTest Catch2::Catch2 fmt::fmt)
 
 enable_testing()

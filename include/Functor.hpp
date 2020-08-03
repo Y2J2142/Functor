@@ -13,7 +13,8 @@ concept Collection = requires(T t) {
 	t.end();
 	t.size();
 	// typename T::value_type; // std::remove_cvref_t<T>::value_type;
-};
+}
+&&NotTypeV<IsStdArray<T>>;
 
 template <Collection T>
 class Functor {

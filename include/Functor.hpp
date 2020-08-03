@@ -35,7 +35,7 @@ class Functor {
 	template <typename Func, typename ValueType = T::value_type,
 			  typename Ret =
 				  std::remove_cvref_t<std::invoke_result_t<Func, ValueType>>,
-			  typename ReturnFunctor = SwapTemplateParameter<Ret, T>::Type>
+			  typename ReturnFunctor = SwapTemplateParameterT<Ret, T>>
 	Functor<ReturnFunctor> Map(Func &&f) const {
 		ReturnFunctor outFunctor{};
 		if constexpr (requires { this->collection.reserve(1); })

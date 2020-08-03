@@ -24,6 +24,9 @@ struct SwapTemplateParameter<NewType, Base<OldType>> {
 	using Type = Base<NewType>;
 };
 
+template <typename T, typename U>
+using SwapTemplateParameterT = typename SwapTemplateParameter<T, U>::Type;
+
 template <typename...>
 struct IsStdArray : std::false_type {};
 

@@ -31,7 +31,7 @@ template <typename T, std::size_t N>
 struct IsStdArray<std::array<T, N>> : std::true_type {};
 
 template <typename... T>
-constexpr inline bool IsStdArray_v = IsStdArray<T...>::value;
+constexpr inline bool IsStdArrayV = IsStdArray<T...>::value;
 
 template <typename T>
 concept Bool = std::is_convertible_v<T, bool> || std::is_same_v<T, bool>;
@@ -62,6 +62,6 @@ template <FalseType T>
 struct NotType<T> : std::true_type {};
 
 template <BooleanType T>
-constexpr inline bool NotType_v = NotType<T>::value;
+constexpr inline bool NotTypeV = NotType<T>::value;
 
 } // namespace Functional

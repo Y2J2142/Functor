@@ -18,7 +18,7 @@ TEST_CASE("IsStdArray testing", "[trait]") {
 	auto isArr = IsStdArray<floatArr>::value;
 	REQUIRE(IsStdArray<floatArr>::value);
 	REQUIRE(IsStdArray<float>::value == false);
-	REQUIRE(IsStdArray_v<int[4]> == false);
+	REQUIRE(IsStdArrayV<int[4]> == false);
 }
 
 TEST_CASE("Bool concept", "[trait]") {
@@ -36,10 +36,10 @@ TEST_CASE("BooleanType concept", "[trait]") {
 }
 
 TEST_CASE("NotType struct", "[trait]") {
-	REQUIRE(NotType_v<std::false_type>);
-	REQUIRE(NotType_v<std::true_type> == false);
+	REQUIRE(NotTypeV<std::false_type>);
+	REQUIRE(NotTypeV<std::true_type> == false);
 	struct Derived : std::true_type {};
-	REQUIRE(NotType_v<Derived> == false);
+	REQUIRE(NotTypeV<Derived> == false);
 }
 
 TEST_CASE("Not function", "[trait]") {

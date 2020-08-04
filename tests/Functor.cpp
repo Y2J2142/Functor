@@ -26,9 +26,8 @@ TEST_CASE("Filter", "[functor]") {
 	auto functor = From(std::vector{1, 2, 4, 5, 6, 7, 8, 9, 10});
 	auto evens = functor.Filter([](auto i) { return i % 2 == 0; });
 	REQUIRE(evens.UnderlyingCollection() == std::vector{2, 4, 6, 8, 10});
-	auto square = [](int i) { return i * i; };
 	auto even = [](int i) { return i % 2 == 0; };
-	auto evenSquares = functor.Map(square).Filter(even);
 	auto inPlace =
 		Functor{std::vector{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}}.Filter(even);
+	REQUIRE(inPlace.UnderlyingCollection() == std::vector{2, 4, 6, 8, 10});
 }

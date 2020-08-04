@@ -23,11 +23,13 @@ class Functor {
 	T &UnderlyingCollection() noexcept { return collection; }
 	Functor(T &&t) : collection{std::move(t)} {}
 	Functor(const T &t) : collection{t} {}
+
 	template <typename Func, typename ValueType = T::value_type,
 			  typename Ret =
 				  std::remove_cvref_t<std::invoke_result_t<Func, ValueType>>,
 			  typename ReturnFunctor = SwapTemplateParameterT<Ret, T>>
-	Functor<ReturnFunctor> Map(Func &&f) const {
+	requires RegularCallable<Func, ValueType> Functor<ReturnFunctor>
+		Map(Func &&f) const {
 		ReturnFunctor outFunctor{};
 		if constexpr (requires { this->collection.reserve(1); })
 			outFunctor.reserve(outFunctor.size());
@@ -36,6 +38,15 @@ class Functor {
 					   std::back_inserter(outFunctor), std::forward<Func>(f));
 
 		return Functor<ReturnFunctor>{std::move(outFunctor)};
+	}
+
+	template <typename Func, typename ValueType = T::value_type,
+			  typename Ret = ClearTypeT<std::invoke_result_t<Func, ValueType>>>
+	requires std::is_same_v<Ret, ValueType> &&Iterable<T>
+		Functor Map(Func &&f) && {
+		std::transform(this->begin(), this->end(), this->begin(),
+					   std::forward<Func>(f));
+		return *this;
 	}
 
 	template <typename Func>

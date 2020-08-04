@@ -1,6 +1,7 @@
 #pragma once
 #include <array>
 #include <cstddef>
+#include <functional>
 #include <type_traits>
 namespace Functional {
 
@@ -66,5 +67,52 @@ struct NotType<T> : std::true_type {};
 
 template <BooleanType T>
 constexpr inline bool NotTypeV = NotType<T>::value;
+
+template <typename Func, typename... Args>
+concept Callable = requires(Func &&f, Args &&... args) {
+	std::invoke(std::forward<Func>(f), std::forward<Args>(args)...);
+};
+
+template <typename Func, typename... Args>
+concept RegularCallable = Callable<Func, Args...>;
+template <class From, class To>
+concept convertible_to = std::is_convertible_v<From, To> &&requires(
+	std::add_rvalue_reference_t<From> (&f)()) {
+	static_cast<To>(f());
+};
+
+template <typename Func, typename Arg>
+concept UnaryPredicate = requires(Func f, Arg arg) {
+	{ f(arg) }
+	->convertible_to<bool>;
+};
+
+template <typename T>
+concept ConstIterable = requires(T t) {
+	typename T::const_iterator;
+};
+// mb this will work someday :c
+template <typename T>
+concept Erasable = ConstIterable<T> &&requires(T t) {
+	t.erase(typename T::const_iterator{}, typename T::const_iterator{});
+};
+// mb this will work someday :c
+template <typename T>
+concept InnerValue = requires {
+	typename T::value_type;
+};
+
+template <typename T>
+using ClearTypeT = std::remove_cvref_t<T>;
+
+template <typename T>
+concept Collection = requires(T t) {
+	t.begin();
+	t.end();
+	t.size();
+	requires ConstIterable<ClearTypeT<T>>;
+	requires NotTypeV<IsStdArray<T>>;
+	requires InnerValue<ClearTypeT<T>>;
+};
 
 } // namespace Functional

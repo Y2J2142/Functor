@@ -46,3 +46,18 @@ TEST_CASE("Not function", "[trait]") {
 	REQUIRE(Not(false));
 	REQUIRE(Not(true) == false);
 }
+
+TEST_CASE("Const Iterable", "[trait]") {
+	REQUIRE(ConstIterable<std::vector<int>>);
+	REQUIRE(ConstIterable<int> == false);
+}
+
+TEST_CASE("Inner value", "[trait]") {
+	REQUIRE(InnerValue<std::vector<int>>);
+	REQUIRE(InnerValue<int> == false);
+}
+
+TEST_CASE("Erasable", "[trait]") {
+	REQUIRE(Erasable<int> == false);
+	REQUIRE(Erasable<std::vector<int>>);
+}

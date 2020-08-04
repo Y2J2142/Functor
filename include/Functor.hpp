@@ -7,15 +7,6 @@
 #include <utility>
 namespace Functional {
 
-template <typename T>
-concept Collection = requires(T t) {
-	t.begin();
-	t.end();
-	t.size();
-	// typename T::value_type; // std::remove_cvref_t<T>::value_type;
-}
-&&NotTypeV<IsStdArray<T>>;
-
 template <Collection T>
 class Functor {
 

@@ -37,6 +37,25 @@ class Functor {
 
 		return Functor<ReturnFunctor>{std::move(outFunctor)};
 	}
+
+	template <typename Func>
+	requires UnaryPredicate<Func, typename T::value_type>
+		Functor Filter(Func &&f) const {
+		T filtered{};
+		std::copy_if(this->collection.begin(), this->collection.end(),
+					 std::back_inserter(filtered), std::forward<Func>(f));
+
+		return Functor{std::move(filtered)};
+	}
+
+	template <typename Func>
+	requires UnaryPredicate<Func, typename T::value_type> &&Erasable<T>
+		Functor Filter(Func &&f) && {
+		collection.erase(std::remove_if(this->begin(), this->end(),
+										std::not_fn(std::forward<Func>(f))),
+						 this->end());
+		return *this;
+	}
 };
 
 template <Collection T>

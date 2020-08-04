@@ -91,12 +91,12 @@ template <typename T>
 concept ConstIterable = requires(T t) {
 	typename T::const_iterator;
 };
-// mb this will work someday :c
+
 template <typename T>
 concept Erasable = ConstIterable<T> &&requires(T t) {
 	t.erase(typename T::const_iterator{}, typename T::const_iterator{});
 };
-// mb this will work someday :c
+
 template <typename T>
 concept InnerValue = requires {
 	typename T::value_type;

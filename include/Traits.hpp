@@ -75,6 +75,7 @@ concept Callable = requires(Func &&f, Args &&... args) {
 
 template <typename Func, typename... Args>
 concept RegularCallable = Callable<Func, Args...>;
+
 template <class From, class To>
 concept convertible_to = std::is_convertible_v<From, To> &&requires(
 	std::add_rvalue_reference_t<From> (&f)()) {
@@ -90,6 +91,11 @@ concept UnaryPredicate = requires(Func f, Arg arg) {
 template <typename T>
 concept ConstIterable = requires(T t) {
 	typename T::const_iterator;
+};
+
+template <typename T>
+concept Iterable = requires(T t) {
+	typename T::iterator;
 };
 
 template <typename T>
@@ -110,7 +116,6 @@ concept Collection = requires(T t) {
 	t.begin();
 	t.end();
 	t.size();
-	requires ConstIterable<ClearTypeT<T>>;
 	requires NotTypeV<IsStdArray<T>>;
 	requires InnerValue<ClearTypeT<T>>;
 };

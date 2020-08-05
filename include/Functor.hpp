@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <fmt/core.h>
 #include <iterator>
+#include <numeric>
 #include <type_traits>
 #include <utility>
 namespace Functional {
@@ -66,6 +67,14 @@ class Functor {
 										std::not_fn(std::forward<Func>(f))),
 						 this->end());
 		return *this;
+	}
+
+	template <typename Func, typename ValueType = T::value_type,
+			  typename Accumulator =
+				  ClearTypeT<std::invoke_result_t<Func, ValueType, ValueType>>>
+	Accumulator Reduce(Func &&f, Accumulator &&acc = Accumulator{}) const {
+		return std::accumulate(this->begin(), this->end(),
+							   std::forward<Accumulator>(acc));
 	}
 };
 

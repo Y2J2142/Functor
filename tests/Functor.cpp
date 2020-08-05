@@ -31,3 +31,10 @@ TEST_CASE("Filter", "[functor]") {
 		Functor{std::vector{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}}.Filter(even);
 	REQUIRE(inPlace.UnderlyingCollection() == std::vector{2, 4, 6, 8, 10});
 }
+
+TEST_CASE("Reducee", "[functor]") {
+	auto sum = 1 + 2 + 3 + 4 + 5 + 6 + 7 + 8 + 9 + 10;
+	auto acc = From(std::vector{1, 2, 3, 4, 5, 6, 7, 8, 9, 10})
+				   .Reduce([](int a, int b) { return a + b; });
+	REQUIRE(sum == acc);
+}

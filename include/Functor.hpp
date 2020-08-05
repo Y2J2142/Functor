@@ -129,6 +129,20 @@ class Functor {
 
 		return Functor<SwapTemplateParameterT<T, T>>{outCollection};
 	}
+
+	bool Any() const noexcept { return this->size() != 0; }
+
+	bool Any(const T::value_type &t) const noexcept
+		requires EqualityComparable<T> {
+		return std::any_of(this->begin(), this->end(),
+						   [&t](auto &&i) { return i == t; });
+	}
+
+	template <typename Func>
+	bool Any(Func &&f) const
+		requires UnaryPredicate<Func, typename T::value_type> {
+		return std::any_of(this->begin(), this->end(), std::forward<Func>(f));
+	}
 };
 
 template <Collection T>

@@ -56,3 +56,14 @@ TEST_CASE("Chunk", "[functor]") {
 		From(std::vector{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}).Chunk(1);
 	REQUIRE(rvalueChunked.size() == 10);
 }
+
+TEST_CASE("Any", "[functor]") {
+	REQUIRE(Functor{std::vector<int>{}}.Any() == false);
+	REQUIRE(Functor{std::vector{1, 2, 3}}.Any());
+	REQUIRE(Functor{std::string{"xd"}}.Any('x'));
+	REQUIRE(Functor{std::vector{1, 2, 3, 4}}.Any(5) == false);
+	REQUIRE(
+		Functor{std::vector{1, 2, 3, 4}}.Any([](int i) { return i % 2 == 0; }));
+	REQUIRE(Functor{std::vector{1, 2, 3, 4}}.Any(
+				[](int i) { return i == 10; }) == false);
+}

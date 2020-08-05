@@ -61,3 +61,9 @@ TEST_CASE("Erasable", "[trait]") {
 	REQUIRE(Erasable<int> == false);
 	REQUIRE(Erasable<std::vector<int>>);
 }
+
+TEST_CASE("Equality comparable", "[trait]") {
+	REQUIRE(EqualityComparable<int>);
+	struct NonComparable {};
+	REQUIRE(EqualityComparable<NonComparable> == false);
+}

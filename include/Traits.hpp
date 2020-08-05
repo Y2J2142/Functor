@@ -120,4 +120,9 @@ concept Collection = requires(T t) {
 	requires InnerValue<ClearTypeT<T>>;
 };
 
+template <typename T>
+concept EqualityComparable = requires(T t) {
+	t == t;
+};
+
 } // namespace Functional

@@ -1,12 +1,19 @@
 #pragma once
 #include "Traits.hpp"
 #include <algorithm>
+#include <exception>
 #include <fmt/core.h>
 #include <iterator>
 #include <numeric>
 #include <type_traits>
 #include <utility>
 namespace Functional {
+
+struct ChunkToBigException : std::exception {
+	const char *what() const noexcept {
+		return "Chunk cannot be bigger than size of the collection";
+	}
+};
 
 template <Collection T>
 class Functor {
@@ -75,6 +82,52 @@ class Functor {
 	Accumulator Reduce(Func &&f, Accumulator &&acc = Accumulator{}) const {
 		return std::accumulate(this->begin(), this->end(),
 							   std::forward<Accumulator>(acc));
+	}
+
+	Functor<SwapTemplateParameterT<T, T>> Chunk(std::size_t chunkSize) const & {
+		if (chunkSize > this->size())
+			throw ChunkToBigException{};
+		SwapTemplateParameterT<T, T> outCollection{};
+		if constexpr (requires { outCollection.reserve(1); })
+			outCollection.reserve(this->size() / chunkSize + 1);
+		auto chunkBegin = this->begin();
+		auto chunkEnd = chunkBegin;
+		do {
+			if (std::distance(chunkEnd, this->end()) < chunkSize)
+				chunkEnd = this->end();
+			else
+				std::advance(chunkEnd, chunkSize);
+
+			outCollection.emplace_back(chunkBegin, chunkEnd);
+			chunkBegin = chunkEnd;
+		} while (std::distance(chunkBegin, this->end()) > 0);
+
+		return Functor<SwapTemplateParameterT<T, T>>{outCollection};
+	}
+
+	Functor<SwapTemplateParameterT<T, T>> Chunk(std::size_t chunkSize) && {
+		if (chunkSize > this->size())
+			throw ChunkToBigException{};
+
+		SwapTemplateParameterT<T, T> outCollection{};
+		if constexpr (requires { outCollection.reserve(1); })
+			outCollection.reserve(this->size() / chunkSize + 1);
+		auto chunkBegin = this->begin();
+		auto chunkEnd = chunkBegin;
+		do {
+			if (std::distance(chunkEnd, this->end()) < chunkSize)
+				chunkEnd = this->end();
+			else
+				std::advance(chunkEnd, chunkSize);
+			auto chunk = std::vector<typename T::value_type>{};
+			if constexpr (requires { outCollection.reserve(1); })
+				chunk.reserve(chunkSize);
+			std::move(chunkBegin, chunkEnd, std::back_inserter(chunk));
+			outCollection.emplace_back(std::move(chunk));
+			chunkBegin = chunkEnd;
+		} while (std::distance(chunkBegin, this->end()) > 0);
+
+		return Functor<SwapTemplateParameterT<T, T>>{outCollection};
 	}
 };
 

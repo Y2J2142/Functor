@@ -125,4 +125,10 @@ concept EqualityComparable = requires(T t) {
 	t == t;
 };
 
+template <typename T, typename A, typename B>
+concept BinaryPredicate = requires(T t, A a, B b) {
+	{ t(a, b) }
+	->convertible_to<bool>;
+};
+
 } // namespace Functional

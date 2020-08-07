@@ -15,7 +15,6 @@ TEST_CASE("SwapTemplate testing", "[trait]") {
 
 TEST_CASE("IsStdArray testing", "[trait]") {
 	using floatArr = std::array<float, 1>;
-	auto isArr = IsStdArray<floatArr>::value;
 	REQUIRE(IsStdArray<floatArr>::value);
 	REQUIRE(IsStdArray<float>::value == false);
 	REQUIRE(IsStdArrayV<int[4]> == false);
@@ -66,4 +65,10 @@ TEST_CASE("Equality comparable", "[trait]") {
 	REQUIRE(EqualityComparable<int>);
 	struct NonComparable {};
 	REQUIRE(EqualityComparable<NonComparable> == false);
+}
+
+TEST_CASE("Binary predicate", "[trait]") {
+	REQUIRE(BinaryPredicate<std::less<int>, int, int>);
+	auto lambda = [](int a, int b) { return std::string{}; };
+	REQUIRE(BinaryPredicate<decltype(lambda), int, int> == false);
 }

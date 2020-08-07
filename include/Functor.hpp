@@ -143,6 +143,52 @@ class Functor {
 		requires UnaryPredicate<Func, typename T::value_type> {
 		return std::any_of(this->begin(), this->end(), std::forward<Func>(f));
 	}
+
+	std::size_t Count() const noexcept { return this->size(); }
+	std::size_t Count(const T::value_type &t) const noexcept {
+		return std::count(this->begin(), this->end(), t);
+	}
+	template <typename Func>
+	requires UnaryPredicate<Func, typename T::value_type> std::size_t
+		Count(Func &&f) const {
+		return std::count_if(this->begin(), this->end(), std::forward<Func>(f));
+	}
+	template <typename Func = std::less<>>
+	requires BinaryPredicate<Func, typename T::value_type,
+							 typename T::value_type> &&StdSortable<T>
+		Functor Sort(Func &&f = std::less<>{}) const & {
+		T sorted{};
+		if constexpr (requires(T t) { t.reserve(1); })
+			sorted.reserve(this->size());
+		std::copy(this->begin(), this->end(), std::back_inserter(sorted));
+		std::sort(sorted.begin(), sorted.end(), std::forward<Func>(f));
+		return Functor{std::move(sorted)};
+	}
+
+	template <typename Func = std::less<>>
+	requires BinaryPredicate<Func, typename T::value_type,
+							 typename T::value_type> &&StdSortable<T>
+		Functor Sort(Func &&f = std::less<>{}) && {
+		std::sort(this->begin(), this->end(), std::forward<Func>(f));
+		return std::move(*this);
+	}
+
+	template <typename Func = std::less<>>
+	requires BinaryPredicate<Func, typename T::value_type,
+							 typename T::value_type> &&MethodSortable<T>
+		Functor Sort(Func &&f = std::less<>{}) const & {
+		T sorted(this->begin(), this->end());
+		sorted.sort(std::forward<Func>(f));
+		return Functor{std::move(sorted)};
+	}
+
+	template <typename Func = std::less<>>
+	requires BinaryPredicate<Func, typename T::value_type,
+							 typename T::value_type> &&MethodSortable<T>
+		Functor Sort(Func &&f = std::less<>{}) && {
+		collection.sort(std::forward<Func>(f));
+		return std::move(*this);
+	}
 };
 
 template <Collection T>

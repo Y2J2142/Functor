@@ -67,3 +67,26 @@ TEST_CASE("Any", "[functor]") {
 	REQUIRE(Functor{std::vector{1, 2, 3, 4}}.Any(
 				[](int i) { return i == 10; }) == false);
 }
+
+TEST_CASE("Count", "[functor]") {
+	auto moreThanD = [](char c) -> bool { return c > 'd'; };
+	REQUIRE(From("length:8"s).Count() == 8);
+	REQUIRE(From("ababbaaaaaa"s).Count('b') == 3);
+	REQUIRE(From("abcdefgh"s).Count(moreThanD) == 4);
+}
+
+TEST_CASE("Sort", "[functor]") {
+	auto f = From(std::vector{9, 1, 2, 8, 3, 7, 4, 6, 5});
+	auto sorted = f.Sort();
+	REQUIRE(sorted.UnderlyingCollection() ==
+			std::vector{1, 2, 3, 4, 5, 6, 7, 8, 9});
+	auto sortedInPlace = From(std::string{"cbad"}).Sort();
+	REQUIRE(sortedInPlace.UnderlyingCollection() == "abcd");
+	auto reverseSorted = f.Sort(std::greater<>{});
+	REQUIRE(reverseSorted.UnderlyingCollection() ==
+			std::vector{9, 8, 7, 6, 5, 4, 3, 2, 1});
+	const auto list = Functor{std::list{5, 4, 3, 2, 1}};
+	REQUIRE(list.Sort().UnderlyingCollection() == std::list{1, 2, 3, 4, 5});
+	auto sortedList = From(std::list{5, 4, 3, 2, 1}).Sort();
+	REQUIRE(sortedList.UnderlyingCollection() == std::list{1, 2, 3, 4, 5});
+}

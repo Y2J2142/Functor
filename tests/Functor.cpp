@@ -3,10 +3,12 @@
 #include "catch2/catch.hpp"
 #include <fmt/core.h>
 #include <list>
+#include <string>
 #include <type_traits>
 #include <vector>
-using namespace Functional;
 
+using namespace Functional;
+using namespace std::string_literals;
 int triple(int i) { return i * 3; }
 
 TEST_CASE("Functor construction", "[functor]") {

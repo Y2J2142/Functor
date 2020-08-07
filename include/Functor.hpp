@@ -4,6 +4,7 @@
 #include <exception>
 #include <fmt/core.h>
 #include <iterator>
+#include <list>
 #include <numeric>
 #include <type_traits>
 #include <utility>
@@ -93,7 +94,8 @@ class Functor {
 		auto chunkBegin = this->begin();
 		auto chunkEnd = chunkBegin;
 		do {
-			if (std::distance(chunkEnd, this->end()) < chunkSize)
+			if (static_cast<std::size_t>(std::distance(chunkEnd, this->end())) <
+				chunkSize)
 				chunkEnd = this->end();
 			else
 				std::advance(chunkEnd, chunkSize);
@@ -115,7 +117,8 @@ class Functor {
 		auto chunkBegin = this->begin();
 		auto chunkEnd = chunkBegin;
 		do {
-			if (std::distance(chunkEnd, this->end()) < chunkSize)
+			if (static_cast<std::size_t>(std::distance(chunkEnd, this->end())) <
+				chunkSize)
 				chunkEnd = this->end();
 			else
 				std::advance(chunkEnd, chunkSize);

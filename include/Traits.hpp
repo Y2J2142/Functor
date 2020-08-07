@@ -1,7 +1,10 @@
 #pragma once
+#include <algorithm>
 #include <array>
 #include <cstddef>
 #include <functional>
+#include <iterator>
+#include <ranges>
 #include <type_traits>
 namespace Functional {
 
@@ -130,5 +133,18 @@ concept BinaryPredicate = requires(T t, A a, B b) {
 	{ t(a, b) }
 	->convertible_to<bool>;
 };
+
+template <typename T>
+concept StdSortable = requires(T t) {
+	std::ranges::sort(t);
+};
+
+template <typename T>
+concept MethodSortable = requires(T t) {
+	t.sort();
+};
+
+template <typename T>
+concept Sortable = MethodSortable<T> || StdSortable<T>;
 
 } // namespace Functional

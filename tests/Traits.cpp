@@ -1,6 +1,7 @@
 #include "Traits.hpp"
 #include "catch2/catch.hpp"
 #include <fmt/core.h>
+#include <list>
 #include <vector>
 using namespace Functional;
 TEST_CASE("IsSpecialization testing", "[trait]") {
@@ -71,4 +72,26 @@ TEST_CASE("Binary predicate", "[trait]") {
 	REQUIRE(BinaryPredicate<std::less<int>, int, int>);
 	auto lambda = [](int a, int b) { return std::string{}; };
 	REQUIRE(BinaryPredicate<decltype(lambda), int, int> == false);
+}
+TEST_CASE("StdSortable", "[trait]") {
+	REQUIRE(StdSortable<std::vector<int>>);
+	REQUIRE(StdSortable<std::list<int>> == false);
+	// REQUIRE(StdSortable<float> == false);
+	// REQUIRE(StdSortable<std::string>);
+}
+
+TEST_CASE("MethodSortable", "[trait]") {
+	REQUIRE(MethodSortable<std::vector<int>> == false);
+	REQUIRE(MethodSortable<std::list<int>>);
+	struct Test {
+		void sort();
+	};
+	REQUIRE(MethodSortable<Test>);
+}
+
+TEST_CASE("Sortable", "[trait]") {
+	REQUIRE(Sortable<std::vector<int>>);
+	REQUIRE(Sortable<std::string>);
+	REQUIRE(Sortable<std::list<int>>);
+	REQUIRE(Sortable<int> == false);
 }

@@ -171,7 +171,7 @@ class Functor {
 	template <typename Func = std::less<>>
 	requires BinaryPredicate<Func, typename T::value_type,
 							 typename T::value_type> &&StdSortable<T>
-		Functor Sort(Func &&f = std::less<>{}) && {
+		Functor Sort(Func &&f = Func{}) && {
 		std::sort(this->begin(), this->end(), std::forward<Func>(f));
 		return std::move(*this);
 	}
@@ -188,9 +188,20 @@ class Functor {
 	template <typename Func = std::less<>>
 	requires BinaryPredicate<Func, typename T::value_type,
 							 typename T::value_type> &&MethodSortable<T>
-		Functor Sort(Func &&f = std::less<>{}) && {
+		Functor Sort(Func &&f = Func{}) && {
 		collection.sort(std::forward<Func>(f));
 		return std::move(*this);
+	}
+
+	Functor Unique() requires EqualityComparable<typename T::value_type>
+		&&requires(Functor f) {
+		f.Sort();
+	}
+	{
+		auto out = this->Sort();
+		auto &col = out.collection;
+		col.erase(std::unique(col.begin(), col.end()), col.end());
+		return out;
 	}
 };
 

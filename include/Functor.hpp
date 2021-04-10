@@ -44,7 +44,11 @@ class Functor {
 			outFunctor.reserve(outFunctor.size());
 
 		std::transform(collection.begin(), collection.end(),
-					   std::back_inserter(outFunctor), std::forward<Func>(f));
+					   std::back_inserter(outFunctor),
+					   [&f]<typename Arg>(Arg &&arg) {
+						   return std::invoke(std::forward<Func>(f),
+											  std::forward<Arg>(arg));
+					   });
 
 		return Functor<ReturnFunctor>{std::move(outFunctor)};
 	}
@@ -54,7 +58,10 @@ class Functor {
 	requires std::is_same_v<Ret, ValueType> &&Iterable<T>
 		Functor Map(Func &&f) && {
 		std::transform(this->begin(), this->end(), this->begin(),
-					   std::forward<Func>(f));
+					   [&f]<typename Arg>(Arg &&arg) {
+						   return std::invoke(std::forward<Func>(f),
+											  std::forward<Arg>(arg));
+					   });
 		return *this;
 	}
 

@@ -24,6 +24,26 @@ TEST_CASE("Functor map", "[functor]") {
 	auto arr = Functor{std::vector<int>{1, 2, 3, 4, 5}};
 	auto toFloats = arr.Map([](int i) { return static_cast<float>(i); });
 	REQUIRE(std::is_same_v<decltype(toFloats), Functor<std::vector<float>>>);
+
+	struct TestStruct {
+		int i;
+		char c;
+	};
+	auto ints =
+		From(std::vector<TestStruct>{{1, 'a'}, {2, 'b'}, {3, 'c'}, {4, 'd'}})
+			.Map(&TestStruct::i);
+	REQUIRE(std::is_same_v<Functor<std::vector<int>>, decltype(ints)>);
+	REQUIRE(ints == std::vector<int>{
+						1,
+						2,
+						3,
+						4,
+					});
+	const auto constTestStructs =
+		From(std::vector<TestStruct>{{1, 'a'}, {2, 'b'}, {3, 'c'}, {4, 'd'}});
+	auto chars = constTestStructs.Map(&TestStruct::c);
+	REQUIRE(std::is_same_v<Functor<std::vector<char>>, decltype(chars)>);
+	REQUIRE(chars.UnderlyingCollection() == std::vector{'a', 'b', 'c', 'd'});
 }
 
 TEST_CASE("Filter", "[functor]") {

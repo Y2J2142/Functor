@@ -193,8 +193,8 @@ class Functor {
 		return std::move(*this);
 	}
 
-	Functor Unique() requires EqualityComparable<typename T::value_type>
-		&&requires(Functor f) {
+	Functor Unique() const &requires EqualityComparable<typename T::value_type>
+		&&Erasable<T> &&requires(Functor f) {
 		f.Sort();
 	}
 	{
@@ -203,7 +203,18 @@ class Functor {
 		col.erase(std::unique(col.begin(), col.end()), col.end());
 		return out;
 	}
-};
+
+	Functor Unique() && requires EqualityComparable<typename T::value_type>
+							&&Erasable<T> &&requires(Functor f) {
+		f.Sort();
+	}
+	{
+		this->Sort();
+		this->collection.erase(std::unique(this->Begin(), this->End()),
+							   this->End());
+		return this;
+	}
+}; // namespace Functional
 
 template <Collection T>
 auto From(T &&t) {

@@ -92,3 +92,12 @@ TEST_CASE("Sort", "[functor]") {
 	auto sortedList = From(std::list{5, 4, 3, 2, 1}).Sort();
 	REQUIRE(sortedList.UnderlyingCollection() == std::list{1, 2, 3, 4, 5});
 }
+
+TEST_CASE("Unique", "[functor]") {
+	auto f = From(std::vector{1, 1, 1, 1, 1, 1});
+	auto unique = f.Unique();
+	REQUIRE(unique.UnderlyingCollection() == std::vector{1});
+	auto list = From(std::list{1, 2, 1, 3, 3, 4, 6, 3});
+	auto listUnique = list.Unique();
+	REQUIRE(listUnique == std::list{1, 2, 3, 4, 6});
+}

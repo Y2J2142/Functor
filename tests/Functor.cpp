@@ -130,7 +130,7 @@ TEST_CASE("Find", "[functor]") {
 	auto exceptionCaught = false;
 	try {
 		f.Find(6);
-	} catch (const std::runtime_error) {
+	} catch (const std::runtime_error &) {
 		exceptionCaught = true;
 	}
 	REQUIRE(exceptionCaught == true);
@@ -141,7 +141,7 @@ TEST_CASE("Find", "[functor]") {
 	exceptionCaught = false;
 	try {
 		f.Find([](int i) { return i > 10; });
-	} catch (std::runtime_error &) {
+	} catch (const std::runtime_error &) {
 		exceptionCaught = true;
 	}
 	REQUIRE(exceptionCaught == true);

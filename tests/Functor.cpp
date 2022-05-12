@@ -1,6 +1,6 @@
 #include "Functor.hpp"
 #include "Identity.hpp"
-#include "catch2/catch.hpp"
+#include "catch2/catch_all.hpp"
 #include <fmt/core.h>
 #include <list>
 #include <string>
@@ -120,4 +120,29 @@ TEST_CASE("Unique", "[functor]") {
 	auto list = From(std::list{1, 2, 1, 3, 3, 4, 6, 3});
 	auto listUnique = list.Unique();
 	REQUIRE(listUnique == std::list{1, 2, 3, 4, 6});
+}
+
+TEST_CASE("Find", "[functor]") {
+
+	auto f = From(std::vector{1, 2, 3, 4, 5});
+	auto five = f.Find(5);
+	REQUIRE(five == 5);
+	auto exceptionCaught = false;
+	try {
+		f.Find(6);
+	} catch (const std::runtime_error) {
+		exceptionCaught = true;
+	}
+	REQUIRE(exceptionCaught == true);
+
+	auto firstEven = f.Find([](int i) { return i % 2 == 0; });
+	REQUIRE(firstEven == 2);
+
+	exceptionCaught = false;
+	try {
+		f.Find([](int i) { return i > 10; });
+	} catch (std::runtime_error &) {
+		exceptionCaught = true;
+	}
+	REQUIRE(exceptionCaught == true);
 }

@@ -22,6 +22,7 @@ class Functor {
 	T collection;
 
   public:
+	using ValueType = typename T::value_type;
 	Functor() = default;
 	decltype(auto) begin() const noexcept { return collection.begin(); }
 	decltype(auto) begin() noexcept { return collection.begin(); }
@@ -38,7 +39,8 @@ class Functor {
 				  std::remove_cvref_t<std::invoke_result_t<Func, ValueType>>,
 			  typename ReturnFunctor = SwapTemplateParameterT<Ret, T>>
 	requires RegularCallable<Func, ValueType> Functor<ReturnFunctor>
-		Map(Func &&f) const {
+		Map(Func &&f)
+	const {
 		ReturnFunctor outFunctor{};
 		if constexpr (requires { this->collection.reserve(1); })
 			outFunctor.reserve(outFunctor.size());
@@ -55,7 +57,7 @@ class Functor {
 
 	template <typename Func, typename ValueType = T::value_type,
 			  typename Ret = ClearTypeT<std::invoke_result_t<Func, ValueType>>>
-	requires std::is_same_v<Ret, ValueType> &&Iterable<T>
+	requires std::is_same_v<Ret, ValueType> && Iterable<T>
 		Functor Map(Func &&f) && {
 		std::transform(this->begin(), this->end(), this->begin(),
 					   [&f]<typename Arg>(Arg &&arg) {
@@ -67,7 +69,8 @@ class Functor {
 
 	template <typename Func>
 	requires UnaryPredicate<Func, typename T::value_type>
-		Functor Filter(Func &&f) const {
+		Functor Filter(Func &&f)
+	const {
 		T filtered{};
 		std::copy_if(this->collection.begin(), this->collection.end(),
 					 std::back_inserter(filtered), std::forward<Func>(f));
@@ -76,7 +79,7 @@ class Functor {
 	}
 
 	template <typename Func>
-	requires UnaryPredicate<Func, typename T::value_type> &&Erasable<T>
+	requires UnaryPredicate<Func, typename T::value_type> && Erasable<T>
 		Functor Filter(Func &&f) && {
 		collection.erase(std::remove_if(this->begin(), this->end(),
 										std::not_fn(std::forward<Func>(f))),
@@ -142,31 +145,33 @@ class Functor {
 
 	bool Any() const noexcept { return this->size() != 0; }
 
-	bool Any(const T::value_type &t) const noexcept
-		requires EqualityComparable<T> {
+	bool Any(const typename T::value_type &t) const noexcept requires
+		EqualityComparable<T> {
 		return std::any_of(this->begin(), this->end(),
 						   [&t](auto &&i) { return i == t; });
 	}
 
 	template <typename Func>
-	bool Any(Func &&f) const
-		requires UnaryPredicate<Func, typename T::value_type> {
+	bool Any(Func &&f) const requires
+		UnaryPredicate<Func, typename T::value_type> {
 		return std::any_of(this->begin(), this->end(), std::forward<Func>(f));
 	}
 
 	std::size_t Count() const noexcept { return this->size(); }
-	std::size_t Count(const T::value_type &t) const noexcept {
+	std::size_t Count(const typename T::value_type &t) const noexcept {
 		return std::count(this->begin(), this->end(), t);
 	}
 	template <typename Func>
 	requires UnaryPredicate<Func, typename T::value_type> std::size_t
-		Count(Func &&f) const {
+		Count(Func &&f)
+	const {
 		return std::count_if(this->begin(), this->end(), std::forward<Func>(f));
 	}
 	template <typename Func = std::less<>>
 	requires BinaryPredicate<Func, typename T::value_type,
-							 typename T::value_type> &&StdSortable<T>
-		Functor Sort(Func &&f = std::less<>{}) const & {
+							 typename T::value_type> && StdSortable<T>
+		Functor Sort(Func &&f = std::less<>{})
+	const & {
 		T sorted{};
 		if constexpr (requires(T t) { t.reserve(1); })
 			sorted.reserve(this->size());
@@ -177,16 +182,17 @@ class Functor {
 
 	template <typename Func = std::less<>>
 	requires BinaryPredicate<Func, typename T::value_type,
-							 typename T::value_type> &&StdSortable<T>
+							 typename T::value_type> && StdSortable<T>
 		Functor Sort(Func &&f = Func{}) && {
 		std::sort(this->begin(), this->end(), std::forward<Func>(f));
-		return std::move(*this);
+		return *this;
 	}
 
 	template <typename Func = std::less<>>
 	requires BinaryPredicate<Func, typename T::value_type,
-							 typename T::value_type> &&MethodSortable<T>
-		Functor Sort(Func &&f = std::less<>{}) const & {
+							 typename T::value_type> && MethodSortable<T>
+		Functor Sort(Func &&f = std::less<>{})
+	const & {
 		T sorted(this->begin(), this->end());
 		sorted.sort(std::forward<Func>(f));
 		return Functor{std::move(sorted)};
@@ -194,14 +200,15 @@ class Functor {
 
 	template <typename Func = std::less<>>
 	requires BinaryPredicate<Func, typename T::value_type,
-							 typename T::value_type> &&MethodSortable<T>
+							 typename T::value_type> && MethodSortable<T>
 		Functor Sort(Func &&f = Func{}) && {
 		collection.sort(std::forward<Func>(f));
 		return std::move(*this);
 	}
 
-	Functor Unique() const &requires EqualityComparable<typename T::value_type>
-		&&Erasable<T> &&requires(Functor f) {
+	Functor Unique() const &requires
+		EqualityComparable<typename T::value_type> && Erasable<T> &&
+		requires(Functor f) {
 		f.Sort();
 	}
 	{
@@ -211,8 +218,9 @@ class Functor {
 		return out;
 	}
 
-	Functor Unique() && requires EqualityComparable<typename T::value_type>
-							&&Erasable<T> &&requires(Functor f) {
+	Functor Unique() && requires
+		EqualityComparable<typename T::value_type> && Erasable<T> &&
+		requires(Functor f) {
 		f.Sort();
 	}
 	{
@@ -221,11 +229,33 @@ class Functor {
 							   this->End());
 		return this;
 	}
+
+	decltype(auto) Find(const ValueType &t) {
+		auto it = std::find(this->begin(), this->end(), t);
+		if (it == this->end())
+			throw std::runtime_error("Element not found");
+		return *it;
+	}
+
+	template <typename Func>
+	requires Callable<Func, ValueType> &&
+		std::is_convertible_v < std::invoke_result_t<Func, ValueType>,
+	bool > decltype(auto) Find(Func &&f) {
+		auto it =
+			std::find_if(this->begin(), this->end(), std::forward<Func>(f));
+		if (it == this->end())
+			throw std::runtime_error("Element not found");
+		return *it;
+	}
+
 }; // namespace Functional
 
 template <Collection T>
 auto From(T &&t) {
 	return Functor{std::forward<T>(t)};
 }
-
+template <Collection C, typename T = Functor<C>>
+bool operator==(const T &t, const C &o) {
+	return t.UnderlyingCollection() == o;
+}
 } // namespace Functional

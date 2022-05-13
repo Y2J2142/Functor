@@ -5,5 +5,5 @@ using namespace Functional;
 TEST_CASE("Identity function testing", "[id]") {
 	REQUIRE(Identity(int{}) == int{});
 	REQUIRE(Identity(10.f) == 10.f);
-	REQUIRE(std::same_as<decltype(Identity(2.0)), decltype(2.0)>);
+	REQUIRE(std::is_same_v<decltype(Identity(2.0)), decltype(2.0)>);
 }

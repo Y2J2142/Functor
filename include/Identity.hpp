@@ -3,7 +3,7 @@
 namespace Functional {
 
 template <typename T>
-decltype(auto) Identity(T &&t) {
+auto Identity(T &&t) {
 	return std::forward<T>(t);
 }
 

@@ -21,7 +21,7 @@ TEST_CASE("Functor map", "[functor]") {
 	auto func = [](int i) { return i * 2; };
 	auto mapped = functor.Map(func).Map(triple);
 	REQUIRE(mapped.UnderlyingCollection() == std::vector{6, 12, 18, 24, 30});
-	auto arr = Functor{std::vector<int>{1, 2, 3, 4, 5}};
+	auto arr = From( std::vector<int>{1, 2, 3, 4, 5} );
 	auto toFloats = arr.Map([](int i) { return static_cast<float>(i); });
 	REQUIRE(std::is_same_v<decltype(toFloats), Functor<std::vector<float>>>);
 
@@ -67,22 +67,20 @@ TEST_CASE("Reduce", "[functor]") {
 
 TEST_CASE("Chunk", "[functor]") {
 
-	auto functor = Functor{std::list{1, 2, 3, 4, 5, 6, 7, 8}};
+	auto functor = From(std::list{1, 2, 3, 4, 5, 6, 7, 8});
 	auto chunked = functor.Chunk(4);
 	REQUIRE(chunked.size() == 2);
 	REQUIRE(chunked.UnderlyingCollection().front() == std::list{1, 2, 3, 4});
 	REQUIRE(chunked.UnderlyingCollection().back() == std::list{5, 6, 7, 8});
-	REQUIRE(
-		std::is_same_v<decltype(chunked), Functor<std::list<std::list<int>>>>);
-	auto rvalueChunked =
-		From(std::vector{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}).Chunk(1);
+	REQUIRE(std::is_same_v<decltype(chunked), Functor<std::list<std::list<int>>>>);
+	auto rvalueChunked = From(std::vector{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}).Chunk(1);
 	REQUIRE(rvalueChunked.size() == 10);
 }
 
 TEST_CASE("Any", "[functor]") {
 	REQUIRE(Functor{std::vector<int>{}}.Any() == false);
 	REQUIRE(Functor{std::vector{1, 2, 3}}.Any());
-	REQUIRE(Functor{std::string{"xd"}}.Any('x'));
+	REQUIRE(Functor{std::string{"xd"} }.Any('x'));
 	REQUIRE(Functor{std::vector{1, 2, 3, 4}}.Any(5) == false);
 	REQUIRE(
 		Functor{std::vector{1, 2, 3, 4}}.Any([](int i) { return i % 2 == 0; }));

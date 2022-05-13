@@ -7,6 +7,7 @@
 #include <list>
 #include <numeric>
 #include <type_traits>
+#include <stdexcept>
 #include <utility>
 namespace Functional {
 
@@ -34,7 +35,7 @@ class Functor {
 	Functor(T &&t) : collection{std::move(t)} {}
 	Functor(const T &t) : collection{t} {}
 
-	template <typename Func, typename ValueType = T::value_type,
+	template <typename Func,
 			  typename Ret =
 				  std::remove_cvref_t<std::invoke_result_t<Func, ValueType>>,
 			  typename ReturnFunctor = SwapTemplateParameterT<Ret, T>>
@@ -94,8 +95,8 @@ class Functor {
 		return std::accumulate(this->begin(), this->end(),
 							   std::forward<Accumulator>(acc));
 	}
-
-	Functor<SwapTemplateParameterT<T, T>> Chunk(std::size_t chunkSize) const & {
+	template <typename Nested = SwapTemplateParameterT<T, T>>
+	Functor<Nested> Chunk(std::size_t chunkSize)  const & requires Nestable<T> {
 		if (chunkSize > this->size())
 			throw ChunkToBigException{};
 		SwapTemplateParameterT<T, T> outCollection{};
@@ -116,8 +117,8 @@ class Functor {
 
 		return Functor<SwapTemplateParameterT<T, T>>{outCollection};
 	}
-
-	Functor<SwapTemplateParameterT<T, T>> Chunk(std::size_t chunkSize) && {
+	template <typename Nested = SwapTemplateParameterT<T,T>>
+	Functor<Nested> Chunk(std::size_t chunkSize) && {
 		if (chunkSize > this->size())
 			throw ChunkToBigException{};
 
@@ -145,7 +146,7 @@ class Functor {
 
 	bool Any() const noexcept { return this->size() != 0; }
 
-	bool Any(const typename T::value_type &t) const noexcept requires
+	bool Any(const ValueType &t) const noexcept requires
 		EqualityComparable<T> {
 		return std::any_of(this->begin(), this->end(),
 						   [&t](auto &&i) { return i == t; });
@@ -251,7 +252,7 @@ class Functor {
 }; // namespace Functional
 
 template <Collection T>
-auto From(T &&t) {
+Functor<ClearTypeT<T>> From(T &&t) {
 	return Functor{std::forward<T>(t)};
 }
 template <Collection C, typename T = Functor<C>>

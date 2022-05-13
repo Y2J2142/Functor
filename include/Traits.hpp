@@ -20,7 +20,7 @@ struct SwapTemplateParameter {};
 template <typename NewType, template <typename...> typename Base,
 		  typename OldType, typename... Args>
 struct SwapTemplateParameter<NewType, Base<OldType, Args...>> {
-	using Type = Base<NewType, Args...>;
+	using Type = Base<NewType>;
 };
 template <typename NewType, template <typename...> typename Base,
 		  typename OldType>
@@ -146,5 +146,10 @@ concept MethodSortable = requires(T t) {
 
 template <typename T>
 concept Sortable = MethodSortable<T> || StdSortable<T>;
+
+template <typename T, typename U = SwapTemplateParameterT<T,T>>
+concept Nestable = Collection<T> && std::is_default_constructible_v<U>;
+
+
 
 } // namespace Functional

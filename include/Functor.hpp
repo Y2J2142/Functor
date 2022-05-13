@@ -6,8 +6,8 @@
 #include <iterator>
 #include <list>
 #include <numeric>
-#include <type_traits>
 #include <stdexcept>
+#include <type_traits>
 #include <utility>
 namespace Functional {
 
@@ -96,7 +96,7 @@ class Functor {
 							   std::forward<Accumulator>(acc));
 	}
 	template <typename Nested = SwapTemplateParameterT<T, T>>
-	Functor<Nested> Chunk(std::size_t chunkSize)  const & requires Nestable<T> {
+	Functor<Nested> Chunk(std::size_t chunkSize) const &requires Nestable<T> {
 		if (chunkSize > this->size())
 			throw ChunkToBigException{};
 		SwapTemplateParameterT<T, T> outCollection{};
@@ -117,7 +117,7 @@ class Functor {
 
 		return Functor<SwapTemplateParameterT<T, T>>{outCollection};
 	}
-	template <typename Nested = SwapTemplateParameterT<T,T>>
+	template <typename Nested = SwapTemplateParameterT<T, T>>
 	Functor<Nested> Chunk(std::size_t chunkSize) && {
 		if (chunkSize > this->size())
 			throw ChunkToBigException{};
@@ -146,8 +146,7 @@ class Functor {
 
 	bool Any() const noexcept { return this->size() != 0; }
 
-	bool Any(const ValueType &t) const noexcept requires
-		EqualityComparable<T> {
+	bool Any(const ValueType &t) const noexcept requires EqualityComparable<T> {
 		return std::any_of(this->begin(), this->end(),
 						   [&t](auto &&i) { return i == t; });
 	}

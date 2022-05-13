@@ -44,12 +44,12 @@ template <typename T>
 concept Bool = std::is_convertible_v<T, bool> || std::is_same_v<T, bool>;
 
 template <typename T>
-concept TrueType = std::is_base_of_v<std::true_type, T>
-	&&std::is_convertible_v<T, std::true_type>;
+concept TrueType = std::is_base_of_v<std::true_type, T> &&
+	std::is_convertible_v<T, std::true_type>;
 
 template <typename T>
-concept FalseType = std::is_base_of_v<std::false_type, T>
-	&&std::is_convertible_v<T, std::false_type>;
+concept FalseType = std::is_base_of_v<std::false_type, T> &&
+	std::is_convertible_v<T, std::false_type>;
 
 template <Bool T>
 constexpr inline bool Not(T &&t) {
@@ -72,7 +72,7 @@ template <BooleanType T>
 constexpr inline bool NotTypeV = NotType<T>::value;
 
 template <typename Func, typename... Args>
-concept Callable = requires(Func &&f, Args &&... args) {
+concept Callable = requires(Func &&f, Args &&...args) {
 	std::invoke(std::forward<Func>(f), std::forward<Args>(args)...);
 };
 
@@ -80,15 +80,14 @@ template <typename Func, typename... Args>
 concept RegularCallable = Callable<Func, Args...>;
 
 template <class From, class To>
-concept convertible_to = std::is_convertible_v<From, To> &&requires(
-	std::add_rvalue_reference_t<From> (&f)()) {
+concept convertible_to = std::is_convertible_v<From, To> &&
+	requires(std::add_rvalue_reference_t<From> (&f)()) {
 	static_cast<To>(f());
 };
 
 template <typename Func, typename Arg>
 concept UnaryPredicate = requires(Func f, Arg arg) {
-	{ f(arg) }
-	->convertible_to<bool>;
+	{ f(arg) } -> convertible_to<bool>;
 };
 
 template <typename T>
@@ -102,7 +101,7 @@ concept Iterable = requires(T t) {
 };
 
 template <typename T>
-concept Erasable = ConstIterable<T> &&requires(T t) {
+concept Erasable = ConstIterable<T> && requires(T t) {
 	t.erase(typename T::const_iterator{}, typename T::const_iterator{});
 };
 
@@ -130,8 +129,7 @@ concept EqualityComparable = requires(T t) {
 
 template <typename T, typename A, typename B>
 concept BinaryPredicate = requires(T t, A a, B b) {
-	{ t(a, b) }
-	->convertible_to<bool>;
+	{ t(a, b) } -> convertible_to<bool>;
 };
 
 template <typename T>
@@ -147,9 +145,7 @@ concept MethodSortable = requires(T t) {
 template <typename T>
 concept Sortable = MethodSortable<T> || StdSortable<T>;
 
-template <typename T, typename U = SwapTemplateParameterT<T,T>>
+template <typename T, typename U = SwapTemplateParameterT<T, T>>
 concept Nestable = Collection<T> && std::is_default_constructible_v<U>;
-
-
 
 } // namespace Functional

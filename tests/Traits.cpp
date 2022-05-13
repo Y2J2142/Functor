@@ -100,7 +100,7 @@ TEST_CASE("Nestable", "[trait]") {
 	REQUIRE(Nestable<std::list<int>>);
 	REQUIRE(Nestable<std::vector<int>>);
 #if WIN32
-	REQUIRE(!Nestable<std::string>);
+	static_assert(!Nestable<std::string>, "std::string is nestable");
 #else
 	REQUIRE(Nestable<std::string>);
 #endif

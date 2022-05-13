@@ -145,7 +145,10 @@ concept MethodSortable = requires(T t) {
 template <typename T>
 concept Sortable = MethodSortable<T> || StdSortable<T>;
 
-template <typename T, typename U = SwapTemplateParameterT<T, T>>
-concept Nestable = Collection<T> && std::is_default_constructible_v<U>;
-
+template <typename T>
+concept Nestable = Collection<T>
+#ifdef WIN32
+	&& !IsSpecialization<T, std::basic_string>::value
+#endif
+	;
 } // namespace Functional

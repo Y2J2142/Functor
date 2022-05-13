@@ -95,3 +95,13 @@ TEST_CASE("Sortable", "[trait]") {
 	REQUIRE(Sortable<std::list<int>>);
 	REQUIRE(Sortable<int> == false);
 }
+
+TEST_CASE("Nestable", "[trait]") {
+	REQUIRE(Nestable<std::list<int>>);
+	REQUIRE(Nestable<std::vector<int>>);
+#if WIN32
+	REQUIRE(!Nestable<std::string>);
+#else
+	REQUIRE(Nestable<std::string>);
+#endif
+}

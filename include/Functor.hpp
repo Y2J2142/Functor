@@ -30,6 +30,7 @@ class Functor {
 	decltype(auto) end() const noexcept { return collection.end(); }
 	decltype(auto) end() noexcept { return collection.end(); }
 	auto size() const noexcept { return collection.size(); }
+	auto Size() const noexcept { return collection.size(); }
 	const T &UnderlyingCollection() const noexcept { return collection; }
 	T &UnderlyingCollection() noexcept { return collection; }
 	Functor(T &&t) : collection{std::move(t)} {}
@@ -291,13 +292,30 @@ class Functor {
 	requires Callable<Func, ValueType> &&
 		std::is_convertible_v < std::invoke_result_t<Func, ValueType>,
 	bool > decltype(auto) Find(Func &&f) {
-		auto it =
+		const auto it =
 			std::find_if(this->begin(), this->end(), std::forward<Func>(f));
 		if (it == this->end())
 			throw std::runtime_error("Element not found");
 		return *it;
 	}
 
+	auto Average(const ValueType &initialValue = ValueType{}) const &requires
+		Averageable<ValueType> {
+		const auto acc =
+			std::accumulate(this->begin(), this->end(), initialValue);
+		return acc / this->Size();
+	}
+
+	template <typename Func>
+	requires std::is_invocable_v<Func, ValueType> &&
+		Averageable<std::invoke_result_t<Func, ValueType>>
+	auto Average(Func &&f, const ValueType &initialValue = ValueType{}) {
+		auto acc = initialValue;
+		for (const auto &elem : collection) {
+			acc += f(elem);
+		}
+		return acc / this->Size();
+	}
 }; // namespace Functional
 
 template <Collection T>

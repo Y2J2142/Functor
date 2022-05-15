@@ -159,4 +159,10 @@ concept Indexable = Collection<T> && requires(T t) {
 	{ t[0] } -> std::same_as<typename T::value_type &>;
 };
 
+template <typename T>
+concept Averageable = requires(T t) {
+	{t + t};
+	{t / size_t{}};
+};
+
 } // namespace Functional

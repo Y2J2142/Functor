@@ -171,3 +171,13 @@ TEST_CASE("Index Operator", "[functor]") {
 	REQUIRE(functor[3] == 4);
 	REQUIRE(functor[4] == 5);
 }
+
+TEST_CASE("Average", "[functor]") {
+	auto functor = From(std::vector{2, 2, 2, 4, 4, 4});
+	REQUIRE(functor.Average() == 3);
+}
+
+TEST_CASE("AverageBy", "[functor]") {
+	auto functor = From(std::vector{2, 2, 2, 4, 4, 4});
+	REQUIRE(functor.Average([](int i) { return i * 2; }, 0) == 6);
+}

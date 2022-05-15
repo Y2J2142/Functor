@@ -153,4 +153,10 @@ concept HasEmplaceBack = Collection<T> && requires(T t) {
 template <typename T>
 concept Nestable = Collection<T> &&
 	std::is_constructible_v<SwapTemplateParameterT<T, T>> && HasEmplaceBack<T>;
+
+template <typename T>
+concept Indexable = Collection<T> && requires(T t) {
+	{ t[0] } -> std::same_as<typename T::value_type &>;
+};
+
 } // namespace Functional

@@ -35,6 +35,15 @@ class Functor {
 	Functor(T &&t) : collection{std::move(t)} {}
 	Functor(const T &t) : collection{t} {}
 
+	ValueType &operator[](size_t idx) noexcept requires Indexable<T> {
+		return collection[idx];
+	}
+
+	const ValueType &
+		operator[](size_t idx) const noexcept requires Indexable<T> {
+		return collection[idx];
+	}
+
 	template <typename Func,
 			  typename Ret =
 				  std::remove_cvref_t<std::invoke_result_t<Func, ValueType>>,

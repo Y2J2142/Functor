@@ -91,7 +91,8 @@ TEST_CASE("Template Chunk", "[functor]") {
 	REQUIRE(v[2] == "ccc");
 
 	auto rvalue = Functor{std::string{"KastaSquad"}}.Chunk<std::vector>(5);
-	REQUIRE(rvalue.UnderlyingCollection().front() == "Kasta");
+	REQUIRE(rvalue[0] == "Kasta");
+	REQUIRE(rvalue[1] == "Squad");
 }
 
 TEST_CASE("Any", "[functor]") {
@@ -160,4 +161,13 @@ TEST_CASE("Find", "[functor]") {
 		exceptionCaught = true;
 	}
 	REQUIRE(exceptionCaught == true);
+}
+
+TEST_CASE("Index Operator", "[functor]") {
+	auto functor = Functor{std::vector{1, 2, 3, 4, 5}};
+	REQUIRE(functor[0] == 1);
+	REQUIRE(functor[1] == 2);
+	REQUIRE(functor[2] == 3);
+	REQUIRE(functor[3] == 4);
+	REQUIRE(functor[4] == 5);
 }

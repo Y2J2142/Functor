@@ -77,6 +77,21 @@ TEST_CASE("Chunk", "[functor]") {
 	auto rvalueChunked =
 		From(std::vector{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}).Chunk(1);
 	REQUIRE(rvalueChunked.size() == 10);
+	auto chunkBiggerThanOriginal = From(std::vector{1, 2, 3}).Chunk(5);
+	REQUIRE(std::is_same_v<Functor<std::vector<std::vector<int>>>,
+						   decltype(chunkBiggerThanOriginal)>);
+}
+
+TEST_CASE("Template Chunk", "[functor]") {
+	auto functor = Functor{std::string{"aaabbbccc"}};
+	auto vv = functor.Chunk<std::vector>(3);
+	auto &v = vv.UnderlyingCollection();
+	REQUIRE(v[0] == "aaa");
+	REQUIRE(v[1] == "bbb");
+	REQUIRE(v[2] == "ccc");
+
+	auto rvalue = Functor{std::string{"KastaSquad"}}.Chunk<std::vector>(5);
+	REQUIRE(rvalue.UnderlyingCollection().front() == "Kasta");
 }
 
 TEST_CASE("Any", "[functor]") {

@@ -95,10 +95,7 @@ class Functor {
 		return std::accumulate(this->begin(), this->end(),
 							   std::forward<Accumulator>(acc));
 	}
-	template <typename Nested = SwapTemplateParameterT<T, T>>
-	Functor<Nested> Chunk(std::size_t chunkSize) const &requires Nestable<T> {
-		if (chunkSize > this->size())
-			throw ChunkToBigException{};
+	auto Chunk(std::size_t chunkSize) const &requires Nestable<T> {
 		SwapTemplateParameterT<T, T> outCollection{};
 		if constexpr (requires { outCollection.reserve(1); })
 			outCollection.reserve(this->size() / chunkSize + 1);
@@ -117,11 +114,7 @@ class Functor {
 
 		return Functor<SwapTemplateParameterT<T, T>>{outCollection};
 	}
-	template <typename Nested = SwapTemplateParameterT<T, T>>
-	Functor<Nested> Chunk(std::size_t chunkSize) && {
-		if (chunkSize > this->size())
-			throw ChunkToBigException{};
-
+	auto Chunk(std::size_t chunkSize) && requires Nestable<T> {
 		SwapTemplateParameterT<T, T> outCollection{};
 		if constexpr (requires { outCollection.reserve(1); })
 			outCollection.reserve(this->size() / chunkSize + 1);
@@ -133,7 +126,7 @@ class Functor {
 				chunkEnd = this->end();
 			else
 				std::advance(chunkEnd, chunkSize);
-			auto chunk = std::vector<typename T::value_type>{};
+			auto chunk = T{};
 			if constexpr (requires { outCollection.reserve(1); })
 				chunk.reserve(chunkSize);
 			std::move(chunkBegin, chunkEnd, std::back_inserter(chunk));
@@ -142,6 +135,54 @@ class Functor {
 		} while (std::distance(chunkBegin, this->end()) > 0);
 
 		return Functor<SwapTemplateParameterT<T, T>>{outCollection};
+	}
+
+	template <template <typename...> typename C>
+	requires std::is_constructible_v<C<T>> && Collection<C<T>>
+	auto Chunk(std::size_t chunkSize) const & {
+
+		C<T> outCollection{};
+		if constexpr (requires { outCollection.reserve(1); })
+			outCollection.reserve(this->size() / chunkSize + 1);
+		auto chunkBegin = this->begin();
+		auto chunkEnd = chunkBegin;
+		do {
+			if (static_cast<std::size_t>(std::distance(chunkEnd, this->end())) <
+				chunkSize)
+				chunkEnd = this->end();
+			else
+				std::advance(chunkEnd, chunkSize);
+
+			outCollection.emplace_back(chunkBegin, chunkEnd);
+			chunkBegin = chunkEnd;
+		} while (std::distance(chunkBegin, this->end()) > 0);
+
+		return Functor<C<T>>{outCollection};
+	}
+
+	template <template <typename...> typename C>
+	requires std::is_constructible_v<C<T>> && Collection<C<T>>
+	auto Chunk(std::size_t chunkSize) && {
+		C<T> outCollection{};
+		if constexpr (requires { outCollection.reserve(1); })
+			outCollection.reserve(this->size() / chunkSize + 1);
+		auto chunkBegin = this->begin();
+		auto chunkEnd = chunkBegin;
+		do {
+			if (static_cast<std::size_t>(std::distance(chunkEnd, this->end())) <
+				chunkSize)
+				chunkEnd = this->end();
+			else
+				std::advance(chunkEnd, chunkSize);
+			auto chunk = T{};
+			if constexpr (requires { outCollection.reserve(1); })
+				chunk.reserve(chunkSize);
+			std::move(chunkBegin, chunkEnd, std::back_inserter(chunk));
+			outCollection.emplace_back(std::move(chunk));
+			chunkBegin = chunkEnd;
+		} while (std::distance(chunkBegin, this->end()) > 0);
+
+		return Functor<C<T>>{outCollection};
 	}
 
 	bool Any() const noexcept { return this->size() != 0; }

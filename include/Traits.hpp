@@ -146,9 +146,11 @@ template <typename T>
 concept Sortable = MethodSortable<T> || StdSortable<T>;
 
 template <typename T>
-concept Nestable = Collection<T>
-#ifdef WIN32
-	&& !IsSpecialization<T, std::basic_string>::value
-#endif
-	;
+concept HasEmplaceBack = Collection<T> && requires(T t) {
+	{ t.emplace_back() } -> std::same_as<typename T::value_type &>;
+};
+
+template <typename T>
+concept Nestable = Collection<T> &&
+	std::is_constructible_v<SwapTemplateParameterT<T, T>> && HasEmplaceBack<T>;
 } // namespace Functional

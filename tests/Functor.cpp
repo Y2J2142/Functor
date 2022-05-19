@@ -136,6 +136,8 @@ TEST_CASE("Unique", "[functor]") {
 	auto list = From(std::list{1, 2, 1, 3, 3, 4, 6, 3});
 	auto listUnique = list.Unique();
 	REQUIRE(listUnique == std::list{1, 2, 3, 4, 6});
+	auto uniqueRvalue = From("aabbcc"s).Unique();
+	REQUIRE(uniqueRvalue == "abc"s);
 }
 
 TEST_CASE("Find", "[functor]") {
@@ -180,4 +182,97 @@ TEST_CASE("Average", "[functor]") {
 TEST_CASE("AverageBy", "[functor]") {
 	auto functor = From(std::vector{2, 2, 2, 4, 4, 4});
 	REQUIRE(functor.Average([](int i) { return i * 2; }, 0) == 6);
+	auto strings = From(std::vector{"abc"s, "abcde"s});
+	REQUIRE(strings.Average([](const std::string &s) { return s.size(); }) ==
+			4);
+}
+
+TEST_CASE("Flatten", "[functor]") {
+	auto functor = From(std::vector{std::vector{std::vector{1}},
+									std::vector{std::vector{2}},
+									std::vector{std::vector{3}}});
+	auto flat = functor.Flatten();
+	REQUIRE(std::is_same_v<decltype(flat), Functor<std::vector<int>>>);
+	REQUIRE(flat == std::vector{1, 2, 3});
+}
+
+TEST_CASE("Collect", "[functor]") {
+	auto functor = Functor{std::vector{1, 1, 1}};
+	auto mapped = functor.Collect([](int) { return std::vector{1, 2, 3}; });
+	REQUIRE(mapped == std::vector{1, 2, 3, 1, 2, 3, 1, 2, 3});
+
+	auto string = From(std::vector{"abc"s, "def"s});
+	auto collected = string.Collect([](const std::string &s) {
+		std::vector<char> out{};
+		std::copy(s.begin(), s.end(), std::back_inserter(out));
+		return out;
+	});
+	REQUIRE(collected == std::vector{'a', 'b', 'c', 'd', 'e', 'f'});
+}
+
+TEST_CASE("ForAll", "[functor]") {
+	auto f1 = Functor{std::vector{2, 4, 6, 8}};
+	auto f2 = Functor{std::vector{2, 3, 6, 8}};
+	auto isEven = [](int i) { return i % 2 == 0; };
+	REQUIRE(f1.ForAll(isEven) == true);
+	REQUIRE(f2.ForAll(isEven) == false);
+}
+
+TEST_CASE("Head", "[functor]") {
+	auto functor = Functor{std::list{1, 2, 3}};
+	auto empty = Functor{std::string{}};
+	REQUIRE(functor.Head() == 1);
+	auto exceptionThrown = false;
+	try {
+		empty.Head();
+	} catch (EmptyFunctorException &) {
+		exceptionThrown = true;
+	}
+	REQUIRE(exceptionThrown == true);
+	auto headOfRValue = From("abs"s).Head();
+	REQUIRE(headOfRValue == 'a');
+	exceptionThrown = false;
+	try {
+		From(""s).Head();
+	} catch (EmptyFunctorException &) {
+		exceptionThrown = true;
+	}
+	REQUIRE(exceptionThrown == true);
+}
+
+TEST_CASE("Tail", "[functor]") {
+	auto f = Functor{"abc"s};
+	auto fTail = f.Tail();
+	auto empty = Functor{std::string{}};
+	REQUIRE(fTail == "bc"s);
+	auto exceptionThrown = false;
+	try {
+		empty.Tail();
+	} catch (EmptyFunctorException &) {
+		exceptionThrown = true;
+	}
+	REQUIRE(exceptionThrown == true);
+	auto tailOfRValue = From("abs"s).Tail();
+	REQUIRE(std::is_same_v<decltype(tailOfRValue), Functor<std::string>>);
+	REQUIRE(tailOfRValue == "bs"s);
+	exceptionThrown = false;
+	try {
+		From(""s).Tail();
+	} catch (EmptyFunctorException &) {
+		exceptionThrown = true;
+	}
+	REQUIRE(exceptionThrown == true);
+}
+
+TEST_CASE("Add", "[functor]") {
+	auto f = Functor{""s};
+	f.Add('a').Add('b').Add('c').Add('d');
+	REQUIRE(f == "abcd"s);
+	auto add = From(""s).Add('a').Add('b').Add('c').Add('d');
+	REQUIRE(add == "abcd"s);
+
+	const auto functor = Functor{"ab"s};
+	auto extended = functor.Add('c');
+	REQUIRE(functor == "ab"s);
+	REQUIRE(extended == "abc"s);
 }

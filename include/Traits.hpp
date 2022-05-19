@@ -165,4 +165,35 @@ concept Averageable = requires(T t) {
 	{t / size_t{}};
 };
 
+template <class...>
+struct Flatten {};
+
+template <Collection T>
+struct Flatten<T> {
+	using Type = Flatten<typename T::value_type>::Type;
+};
+template <class T>
+struct Flatten<T> {
+	using Type = T;
+};
+
+template <class T, class FlatContainer>
+void flatten(const T &t, FlatContainer &flat) {
+
+	if constexpr (Collection<T>) {
+		for (auto elem : t) {
+			flatten(elem, flat);
+		}
+	} else {
+		flat.push_back(t);
+	}
+}
+
+template <class T, class Flat = Flatten<T>::Type>
+auto flatten(const T &t) {
+	SwapTemplateParameterT<Flat, T> flatContainer{};
+	flatten(t, flatContainer);
+	return flatContainer;
+}
+
 } // namespace Functional

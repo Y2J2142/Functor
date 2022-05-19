@@ -11,10 +11,8 @@
 #include <utility>
 namespace Functional {
 
-struct ChunkToBigException : std::exception {
-	const char *what() const noexcept {
-		return "Chunk cannot be bigger than size of the collection";
-	}
+struct EmptyFunctorException : std::exception {
+	const char *what() const noexcept { return "Functor is empty"; }
 };
 
 template <Collection T>
@@ -276,9 +274,9 @@ class Functor {
 	}
 	{
 		this->Sort();
-		this->collection.erase(std::unique(this->Begin(), this->End()),
-							   this->End());
-		return this;
+		this->collection.erase(std::unique(this->begin(), this->end()),
+							   this->end());
+		return *this;
 	}
 
 	decltype(auto) Find(const ValueType &t) {
@@ -306,16 +304,84 @@ class Functor {
 		return acc / this->Size();
 	}
 
-	template <typename Func>
+	template <typename Func,
+			  typename AverageType = std::invoke_result_t<Func, ValueType>>
 	requires std::is_invocable_v<Func, ValueType> &&
 		Averageable<std::invoke_result_t<Func, ValueType>>
-	auto Average(Func &&f, const ValueType &initialValue = ValueType{}) {
+	auto Average(Func &&f, const AverageType &initialValue = AverageType{}) {
 		auto acc = initialValue;
 		for (const auto &elem : collection) {
 			acc += f(elem);
 		}
 		return acc / this->Size();
 	}
+
+	decltype(auto) Flatten() {
+		if constexpr (Collection<ValueType>) {
+			auto flatCollection = flatten(collection);
+			return Functor<decltype(flatCollection)>{std::move(flatCollection)};
+		} else {
+			return *this;
+		}
+	}
+
+	template <typename Func>
+	auto Collect(Func &&f) {
+		return this->Map(f).Flatten();
+	}
+	template <class Func>
+	requires UnaryPredicate<Func, ValueType>
+	bool ForAll(Func &&f) {
+		return std::all_of(this->begin(), this->end(), std::forward<Func>(f));
+	}
+
+	const ValueType &Head() const & {
+		if (this->size() == 0)
+			throw EmptyFunctorException{};
+		return *begin();
+	}
+	ValueType &Head() & {
+		if (this->size() == 0)
+			throw EmptyFunctorException{};
+		return *begin();
+	}
+	ValueType Head() && {
+		if (this->size() == 0)
+			throw EmptyFunctorException{};
+		return std::move(*begin());
+	}
+
+	auto Tail() const & {
+		if (this->size() == 0)
+			throw EmptyFunctorException{};
+		Functor tail{};
+		std::copy(std::next(this->begin(), 1), this->end(),
+				  std::back_inserter(tail.collection));
+		return tail;
+	}
+
+	auto Tail() && {
+		if (this->size() == 0)
+			throw EmptyFunctorException{};
+		collection.erase(collection.begin());
+		return *this;
+	}
+
+	Functor &Add(const ValueType &value) {
+		collection.push_back(value);
+		return *this;
+	}
+
+	Functor Add(const ValueType &value) const {
+		auto copy = T{};
+		if constexpr (requires { copy.reserve(1); })
+			copy.reserve(collection.size());
+		std::copy(collection.begin(), collection.end(),
+				  std::back_inserter(copy));
+		copy.push_back(value);
+		return Functor{copy};
+	}
+
 }; // namespace Functional
 
 template <Collection T>

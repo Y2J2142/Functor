@@ -276,3 +276,29 @@ TEST_CASE("Add", "[functor]") {
 	REQUIRE(functor == "ab"s);
 	REQUIRE(extended == "abc"s);
 }
+
+TEST_CASE("Zip", "[functor]") {
+	auto f1 = Functor{std::vector{1, 2, 3}};
+	auto f2 = Functor{"abc"s};
+	auto f3 = Functor{std::list{true, false, true}};
+	auto zippped = Zip<std::vector>(f1, f2, f3);
+}
+
+TEST_CASE("WithIndex", "[functor]") {
+	auto functor = Functor{std::vector{'a', 'b', 'c'}};
+	auto indexed = functor.WithIndex();
+	for (auto &&[idx, elem] : indexed) {
+		fmt::print("index: {} elem {}", idx, elem);
+	}
+	REQUIRE(
+		std::is_same_v<decltype(indexed)::ValueType, std::pair<size_t, char>> ==
+		true);
+}
+
+TEST_CASE("StripIndex", "[functor]") {
+	auto functor = Functor{std::vector{'a', 'b', 'c'}};
+	auto indexed = functor.WithIndex();
+	auto strip = indexed.StripIndex();
+	REQUIRE(strip == functor);
+	REQUIRE(std::is_same_v<decltype(functor), decltype(strip)> == true);
+}

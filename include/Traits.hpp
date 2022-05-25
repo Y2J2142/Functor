@@ -196,4 +196,9 @@ auto flatten(const T &t) {
 	return flatContainer;
 }
 
+template <class T, class... Ts>
+requires(std::equality_comparable_with<T, Ts> &&...) bool allEqual(T &&t,
+																   Ts &&...ts) {
+	return ((std::forward<T>(t) == std::forward<Ts>(ts)) && ...);
+}
 } // namespace Functional

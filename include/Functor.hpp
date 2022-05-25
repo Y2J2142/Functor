@@ -1,6 +1,7 @@
 #pragma once
 #include "Traits.hpp"
 #include <algorithm>
+#include <compare>
 #include <exception>
 #include <fmt/core.h>
 #include <iterator>
@@ -15,13 +16,21 @@ struct EmptyFunctorException : std::exception {
 	const char *what() const noexcept { return "Functor is empty"; }
 };
 
+struct UnevenFunctorsException : std::exception {
+	const char *what() const noexcept {
+		return "Functors have different sizes";
+	}
+};
+
 template <Collection T>
 class Functor {
 
 	T collection;
 
   public:
+	auto operator<=>(const Functor &) const = default;
 	using ValueType = typename T::value_type;
+	using value_type = ValueType;
 	Functor() = default;
 	decltype(auto) begin() const noexcept { return collection.begin(); }
 	decltype(auto) begin() noexcept { return collection.begin(); }
@@ -382,6 +391,25 @@ class Functor {
 		return Functor{copy};
 	}
 
+	auto WithIndex() requires std::is_constructible_v<
+		SwapTemplateParameterT<std::pair<std::size_t, ValueType>, T>> {
+		using Pair = std::pair<std::size_t, ValueType>;
+		using OutCollection = SwapTemplateParameterT<Pair, T>;
+		OutCollection out{};
+
+		if constexpr (requires { out.reserve(1); })
+			out.reserve(collection.size());
+		std::size_t counter{};
+		for (auto &&elem : collection) {
+			out.push_back({counter++, elem});
+		}
+
+		return Functor<OutCollection>{out};
+	}
+	auto StripIndex() requires IsSpecialization<ValueType, std::pair>::value {
+		return this->Map(&ValueType::second);
+	}
+
 }; // namespace Functional
 
 template <Collection T>
@@ -392,4 +420,23 @@ template <Collection C, typename T = Functor<C>>
 bool operator==(const T &t, const C &o) {
 	return t.UnderlyingCollection() == o;
 }
+
+template <template <class...> class Container, class... T>
+requires(sizeof...(T) >= 2) auto Zip(T &&...t) {
+
+	if (not allEqual(t.size()...))
+		throw UnevenFunctorsException{};
+
+	auto size =
+		std::get<0>(std::forward_as_tuple(std::forward<T &&>(t)...)).size();
+	using Tuple = std::tuple<typename ClearTypeT<T>::ValueType...>;
+	Container<Tuple> out{};
+	out.reserve(size);
+
+	for (unsigned int i = 0; i < size; ++i)
+		out.emplace_back((*std::next(t.begin(), i))...);
+
+	return Functor{std::move(out)};
+}
+
 } // namespace Functional

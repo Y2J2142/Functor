@@ -302,3 +302,22 @@ TEST_CASE("StripIndex", "[functor]") {
 	REQUIRE(strip == functor);
 	REQUIRE(std::is_same_v<decltype(functor), decltype(strip)> == true);
 }
+
+TEST_CASE("Max", "[functor]") {
+	auto f = From(std::vector{1, 10, 2, 5, 4, 100});
+	REQUIRE(f.Max() == 100);
+	auto x = From(std::vector{""s, ""s, "a"s}).Max();
+	REQUIRE(x == "a"s);
+	auto const ff = From(std::vector{1, 10, 2, 5, 4, 100});
+	auto xx = ff.Max();
+	REQUIRE(xx == 100);
+}
+
+TEST_CASE("MaxBy", "[functor]") {
+	std::vector<std::pair<int, int>> vec{{1, 2}, {2, 4}, {10, 1}};
+	auto f = From(vec);
+	auto maxl = f.Max(&decltype(vec)::value_type::first);
+	auto maxr = f.Max(&decltype(vec)::value_type::second);
+	REQUIRE(maxl.first == 10);
+	REQUIRE(maxr.second == 4);
+}

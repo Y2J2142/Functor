@@ -53,8 +53,7 @@ class Functor {
 	}
 
 	template <typename Func,
-			  typename Ret =
-				  std::remove_cvref_t<std::invoke_result_t<Func, ValueType>>,
+			  typename Ret = ClearTypeT<std::invoke_result_t<Func, ValueType>>,
 			  typename ReturnFunctor = SwapTemplateParameterT<Ret, T>>
 	requires RegularCallable<Func, ValueType> Functor<ReturnFunctor>
 		Map(Func &&f)
@@ -408,6 +407,50 @@ class Functor {
 	}
 	auto StripIndex() requires IsSpecialization<ValueType, std::pair>::value {
 		return this->Map(&ValueType::second);
+	}
+
+	const ValueType &Max() const &requires LessThanComparable<ValueType> {
+		return *std::max_element(this->begin(), this->end());
+	}
+
+	ValueType &Max() & requires LessThanComparable<ValueType> {
+		return *std::max_element(this->begin(), this->end());
+	}
+
+	ValueType Max() && requires LessThanComparable<ValueType> {
+		return *std::max_element(this->begin(), this->end());
+	}
+	template <class Func,
+			  class ResultType = std::invoke_result_t<Func, ValueType>>
+	requires Callable<Func, ValueType> && LessThanComparable<ResultType>
+	const ValueType &Max(Func &&f) const & {
+		return *std::max_element(
+			this->begin(), this->end(), [&f](const auto &l, const auto &r) {
+				return std::invoke(std::forward<Func>(f), l) <
+					   std::invoke(std::forward<Func>(f), r);
+			});
+	}
+
+	template <class Func,
+			  class ResultType = std::invoke_result_t<Func, ValueType>>
+	requires Callable<Func, ValueType> && LessThanComparable<ResultType>
+		ValueType &Max(Func &&f) & {
+
+		return *std::max_element(
+			this->begin(), this->end(), [&f](const auto &l, const auto &r) {
+				return std::invoke(std::forward<Func>(f), l) <
+					   std::invoke(std::forward<Func>(f), r);
+			});
+	}
+	template <class Func,
+			  class ResultType = std::invoke_result_t<Func, ValueType>>
+	requires Callable<Func, ValueType> && LessThanComparable<ResultType>
+		ValueType Max(Func &&f) && {
+		return *std::max_element(
+			this->begin(), this->end(), [&f](const auto &l, const auto &r) {
+				return std::invoke(std::forward<Func>(f), l) <
+					   std::invoke(std::forward<Func>(f), r);
+			});
 	}
 
 }; // namespace Functional

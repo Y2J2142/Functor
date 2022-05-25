@@ -201,4 +201,10 @@ requires(std::equality_comparable_with<T, Ts> &&...) bool allEqual(T &&t,
 																   Ts &&...ts) {
 	return ((std::forward<T>(t) == std::forward<Ts>(ts)) && ...);
 }
+
+template <class T>
+concept LessThanComparable = requires(T t) {
+	{ t < t } -> std::convertible_to<bool>;
+};
+
 } // namespace Functional

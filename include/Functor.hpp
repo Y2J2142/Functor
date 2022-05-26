@@ -453,6 +453,28 @@ class Functor {
 			});
 	}
 
+	const ValueType &Min() const &requires LessThanComparable<ValueType> {
+		return *std::min_element(this->begin(), this->end());
+	}
+
+	ValueType &Min() & requires LessThanComparable<ValueType> {
+		return *std::min_element(this->begin(), this->end());
+	}
+
+	ValueType Min() && requires LessThanComparable<ValueType> {
+		return *std::min_element(this->begin(), this->end());
+	}
+	template <class Func,
+			  class ResultType = std::invoke_result_t<Func, ValueType>>
+	requires Callable<Func, ValueType> && LessThanComparable<ResultType>
+	const ValueType &Min(Func &&f) const & {
+		return *std::min_element(
+			this->begin(), this->end(), [&f](const auto &l, const auto &r) {
+				return std::invoke(std::forward<Func>(f), l) <
+					   std::invoke(std::forward<Func>(f), r);
+			});
+	}
+
 }; // namespace Functional
 
 template <Collection T>

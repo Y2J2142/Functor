@@ -321,3 +321,22 @@ TEST_CASE("MaxBy", "[functor]") {
 	REQUIRE(maxl.first == 10);
 	REQUIRE(maxr.second == 4);
 }
+
+TEST_CASE("Min", "[functor]") {
+	auto f = From(std::vector{1, 10, 2, 5, 4, 100});
+	REQUIRE(f.Min() == 1);
+	auto x = From(std::vector{""s, ""s, "a"s}).Min();
+	REQUIRE(x == ""s);
+	auto const ff = From(std::vector{1, 10, 2, 5, 4, 100});
+	auto xx = ff.Min();
+	REQUIRE(xx == 1);
+}
+
+TEST_CASE("MinBy", "[functor]") {
+	std::vector<std::pair<int, int>> vec{{1, 2}, {2, 4}, {10, 1}};
+	auto f = From(vec);
+	auto maxl = f.Min(&decltype(vec)::value_type::first);
+	auto maxr = f.Min(&decltype(vec)::value_type::second);
+	REQUIRE(maxl.first == 1);
+	REQUIRE(maxr.second == 1);
+}

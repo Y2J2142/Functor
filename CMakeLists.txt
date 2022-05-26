@@ -10,7 +10,7 @@ else()
     set(CMAKE_CXX_FLAGS "-fconcepts-diagnostics-depth=5 -Wall -Wextra -Wformat-nonliteral -Wcast-align -Wpointer-arith -Winline -Wundef  -Wcast-qual -Wshadow -Wwrite-strings -Wno-unused-parameter -Wfloat-equal -pedantic -ansi -Wpessimizing-move  -Wredundant-move")
 endif()
 include_directories(include/)
-add_executable(mainTest tests/Identity.cpp tests/Monad.cpp tests/Traits.cpp tests/Functor.cpp tests/Range.cpp)
+add_executable(mainTest tests/Identity.cpp tests/Monad.cpp tests/Traits.cpp tests/Functor.cpp tests/Range.cpp tests/Compose.cpp)
 target_link_libraries(mainTest Catch2::Catch2WithMain fmt::fmt)
 
 enable_testing()

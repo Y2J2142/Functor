@@ -207,4 +207,8 @@ concept LessThanComparable = requires(T t) {
 	{ t < t } -> std::convertible_to<bool>;
 };
 
+template <class F, class G, class... Args>
+concept Chainable = std::is_invocable_v<F, Args...> &&
+	std::is_invocable_v<G, std::invoke_result_t<F, Args...>>;
+
 } // namespace Functional

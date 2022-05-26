@@ -1,3 +1,4 @@
+#pragma once
 #include <compare>
 #include <concepts>
 #include <iterator>

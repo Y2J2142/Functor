@@ -5,7 +5,7 @@
 namespace Functional {
 
 template <class F, class G>
-auto operator>>(F f, G g) {
+auto operator>>(const F &f, const G &g) {
 
 	return [=]<class... Args>
 	requires Chainable<F, G, Args...>(Args && ...args) {

@@ -7,6 +7,7 @@
 #include <iterator>
 #include <list>
 #include <numeric>
+#include <optional>
 #include <stdexcept>
 #include <type_traits>
 #include <utility>
@@ -473,6 +474,19 @@ class Functor {
 				return std::invoke(std::forward<Func>(f), l) <
 					   std::invoke(std::forward<Func>(f), r);
 			});
+	}
+
+	template <class Func, class U = std::invoke_result_t<Func, ValueType>>
+	requires std::invocable<Func, ValueType> &&
+		IsSpecialization<U, std::optional>::value auto
+		Choose(Func &&func) {
+		return this->Map(std::forward<Func>(func))
+			.Filter(
+				[]<class OptionalType>(const std::optional<OptionalType> &opt) {
+					return opt.has_value();
+				})
+			.Map([]<class OptionalType>(
+					 const std::optional<OptionalType> &opt) { return *opt; });
 	}
 
 }; // namespace Functional

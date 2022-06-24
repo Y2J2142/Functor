@@ -3,6 +3,7 @@
 #include "catch2/catch_all.hpp"
 #include <fmt/core.h>
 #include <list>
+#include <optional>
 #include <string>
 #include <type_traits>
 #include <vector>
@@ -339,4 +340,15 @@ TEST_CASE("MinBy", "[functor]") {
 	auto maxr = f.Min(&decltype(vec)::value_type::second);
 	REQUIRE(maxl.first == 1);
 	REQUIRE(maxr.second == 1);
+}
+
+TEST_CASE("Choose", "[functor]") {
+	auto functor = From(std::vector{1, 2, 3, 4, 5});
+	auto filter = [](int i) -> std::optional<int> {
+		if (i & 1)
+			return {i};
+		return {};
+	};
+	auto filtered = functor.Choose(filter);
+	REQUIRE(filtered == std::vector{1, 3, 5});
 }

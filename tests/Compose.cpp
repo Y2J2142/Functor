@@ -19,6 +19,7 @@ TEST_CASE("Compose", "[compose]") {
 	auto fg = length >> twice;
 	auto test = [](std::string) {};
 	auto doesNotCompile = length >> test;
+	(void)doesNotCompile;
 	// doesNotCompile("ab");
 
 	REQUIRE(fg("ab") == 4);

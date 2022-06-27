@@ -22,3 +22,8 @@ TEST_CASE("Partial Application with functions", "[partial]") {
 	auto subtractFrom10 = _w(sub) >= 10;
 	REQUIRE(subtractFrom10(5) == sub(10, 5));
 }
+
+TEST_CASE("Partial Application with std::function", "[partial]") {
+	auto sub10 = std::function{sub} >= 10;
+	REQUIRE(sub10(5) == sub(10, 5));
+}

@@ -212,14 +212,7 @@ concept Chainable = std::is_invocable_v<F, Args...> &&
 	std::is_invocable_v<G, std::invoke_result_t<F, Args...>>;
 
 template <class F>
-struct wrap {
-	F f;
-	operator F() { return f; }
-};
-
-template <class F>
-auto _w(F &&f) {
-	return wrap{std::forward<F>(f)};
+constexpr auto _w(F &&f) {
+	return std::function{std::forward<F>(f)};
 }
-
 } // namespace Functional
